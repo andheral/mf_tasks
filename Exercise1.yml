@@ -1,0 +1,34 @@
+---
+- hosts: localhost
+  #become: true
+  tasks:
+    - name: Create a directory test
+      file: 
+        path: /home/mari/Escritorio/Z
+        state: directory
+        mode: '0755'
+
+    - name: Create a childs to the main directory test
+      file: 
+        path: "/home/mari/Escritorio/Z/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - k1/k1/k1
+        - k2/k2
+        - link/sys_link
+        - link/vivado
+        - link/int
+        - logs
+        - reports
+
+    - name: Create a document in a ChildNode
+      file: 
+        path: "/home/mari/Escritorio/Z/k1/k1/k1/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - ip
+        - k1.design.xml
+        - kernel.xml
+        - solution
