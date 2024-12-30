@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  become: true
+  vars:
+    program: "default"
+  tasks:
+    - name: install a program
+      apt:
+        name: "{{ program }}"
+        state: "latest"
+        update_cache: true
+      register: install_result
+
+    - name: Print message successfully
+      ansible.builtin.debug:
+        msg: "{{ program }} has been installed"
+      when: install_result.changed == true
+      

@@ -1,34 +1,52 @@
 ---
 - hosts: localhost
-  #become: true
+  vars:
+      central_path: "/home/mari/X"
   tasks:
-    - name: Create a directory test
+    - name: Create a directory
       file: 
-        path: /home/mari/Escritorio/Z
+        path: "{{ central_path }}"
         state: directory
         mode: '0755'
 
     - name: Create a childs to the main directory test
       file: 
-        path: "/home/mari/Escritorio/Z/{{ item }}"
+        path: "{{ central_path }}/{{ item }}"
         state: directory
         mode: '0755'
       loop:
-        - k1/k1/k1
+        - k1/k1/k1/ip
+        - k1/k1/k1/solution
         - k2/k2
         - link/sys_link
         - link/vivado
         - link/int
-        - logs
-        - reports
+        - logs/k1
+        - logs/k2
+        - logs/link
+        - reports/k1
+        - reports/k2
+        - reports/link
 
-    - name: Create a document in a ChildNode
+    - name: Create a document in a child nodes
       file: 
-        path: "/home/mari/Escritorio/Z/k1/k1/k1/{{ item }}"
-        state: directory
-        mode: '0755'
+        path: "{{ item }}"
+        state: touch
+        mode: '0644'
       loop:
-        - ip
-        - k1.design.xml
-        - kernel.xml
-        - solution
+        - "{{ central_path }}/k1/k1/k1.tcl"
+        - "{{ central_path }}/k1/k1/k1/k1.design.xml"
+        - "{{ central_path }}/k1/k1/k1/kernel.xml"
+        - "{{ central_path }}/k2/k2/k2.tcl"
+
+    - name: Find the k1 tree directory
+      ansible.builtin.find:
+        paths: "{{ central_path }}/k1"
+        recurse: yes
+        file_type: "any"
+      register: data_found
+
+    - name: Print k1 tree directory
+      ansible.builtin.debug:
+        msg: "{{ item.path }}"
+      loop: "{{ data_found.files }}"
