@@ -1,0 +1,29 @@
+--- 
+- hosts: localhost
+  become: true
+  vars:
+    route: "/"
+  tasks:
+    - name: Find 
+      ansible.builtin.find:
+        paths: "{{ route }}" 
+        recurse: yes
+        patterns: "*.log"
+      register: files_found
+
+    - name: Print message successfully
+      ansible.builtin.debug:
+        msg: "{{ item }}"
+      loop: "{{ files_found.files | map(attribute='path') | list }}"
+
+    - name: Create a document in a child nodes
+      file: 
+        path: "/var/log/mari_log.txt"
+        state: touch
+        mode: '0644'
+
+    - name: Send log files to a new document
+      ansible.builtin.copy:
+        content: "{{ files_found.files | map(attribute='path') | list }}"
+        dest: /var/log/mari_log.txt
+      delegate_to: localhost
