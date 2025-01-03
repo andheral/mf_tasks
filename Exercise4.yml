@@ -1,0 +1,63 @@
+---
+# description: hdjhkjhfjkhdfjhjdfhjhfdhfagsh
+- hosts: localhost
+  become: true
+  vars:
+    users:
+      - username: "test1"
+        email: "mf300577@gmail.com"
+      - username: "test2"
+        email: "mf783005@gmail.com"
+  tasks:
+    - name: Crear usuarios en el sistema
+      user:
+        name: "{{ item.username }}"
+        state: present
+        shell: /bin/bash
+      loop: "{{ users }}"
+
+    - name: Crear el directorio .ssh para cada usuario
+      file:
+        path: "/home/{{ item.username }}/.ssh"
+        state: directory
+        mode: '0700'
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+      loop: "{{ users }}"
+
+    - name: Crear clave SSH para cada usuario
+      openssh_keypair:
+        path: "/home/{{ item.username }}/.ssh/id_rsa"
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: '0600'
+        type: rsa
+        size: 2048
+      loop: "{{ users }}"
+
+    - name: Obtener la clave publica de SSH
+      slurp:
+        src: "/home/{{ item.username }}/.ssh/id_rsa.pub"
+      loop: "{{ users }}"
+      register: public_keys
+
+    - name: Verificar las claves publicas obtenidas
+      debug:
+        var: public_keys
+
+    - name: Enviar la clave SSH por correo electronico
+      mail:
+        host: smtp.gmail.com
+        port: 587
+        from: "mar.fm0577@gmail.com"
+        to: "{{ item.item.email }}"
+        subject: "Your SSH key"
+        body: |
+          Hi {{ item.item.username }},
+          
+          Here is your new SSH key:
+
+          {{ item.content | b64decode }}
+        username: "mar.fm0577@gmail.com"  # Direccin de correo que usas para autenticacin SMTP
+        #password: "2$oNic0_r4Pi8o%"  # Usa una contrasea de aplicacin en Gmail (si tienes verificacin en dos pasos)
+      loop: "{{ public_keys.results }}"

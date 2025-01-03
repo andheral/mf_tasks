@@ -1,0 +1,50 @@
+---
+  # description: "This is a sample playbook to manage users."
+- hosts: localhost
+  become: true
+  gather_facts: no
+  vars:
+    playbooks_created: "/home/mari/mf_tasks" 
+    readme_file: "README_Playbooks.md"
+  tasks:
+    - name: List all playbooks in the directory
+      find:
+        paths: "{{ playbooks_created }}"
+        patterns: "*.yml"
+      register: playbooks
+
+    - name: Initialize README file content
+      set_fact:
+        readme_content: |
+          # Playbook Documentation
+          Information of all the playbooks created *******
+
+    - name: Add playbook details header to README
+      set_fact:
+        readme_content: "{{ readme_content }} ## Playbooks"
+    
+    - name: Read description from each playbook
+      loop: "{{ playbooks.files }}"
+      register: playbook_content
+      command: "head -n 80 {{ item.path }}"
+      ignore_errors: yes
+
+    - name: Append playbook information to README
+      loop: "{{ playbooks.files }}"
+      set_fact:
+            readme_content: "
+            {{ readme_content }}\n
+            - **Playbook Name**: {{ item.path | basename }}\n
+            - **Description**: \n  
+              {% set description = lookup('file', item.path) | regex_search('description:\\s*(.*)', ignorecase=True) %}  
+              {% if description and description[0] is string %}
+                {{ description[0] }}
+              {% else %}
+                No description available in the file.
+              {% endif %}"
+
+    - name: Save README file
+      copy:
+        dest: "{{ readme_file }}"
+        content: "{{ readme_content }}"
+

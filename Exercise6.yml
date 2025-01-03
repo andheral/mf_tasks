@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  become: true
+  gather_facts: no
+  vars:
+    directory: "/"
+  tasks:
+    - name: Find files older than 30 days
+      find:
+        paths: "{{ directory }}" 
+        age: "30d"
+        recurse: yes  
+      register: output
+
+    - name: Show files older than 30 days
+      debug:
+        var: output.files
