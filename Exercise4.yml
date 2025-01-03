@@ -1,5 +1,5 @@
 ---
-# description: hdjhkjhfjkhdfjhjdfhjhfdhfagsh
+# description: Playbook that creates users, SSH Key and send the public SSH Key by Email
 - hosts: localhost
   become: true
   vars:
@@ -7,16 +7,16 @@
       - username: "test1"
         email: "mf300577@gmail.com"
       - username: "test2"
-        email: "mf783005@gmail.com"
+        email: "cm7780@hotmail.com"
   tasks:
-    - name: Crear usuarios en el sistema
+    - name: Create users in the system
       user:
         name: "{{ item.username }}"
         state: present
         shell: /bin/bash
       loop: "{{ users }}"
 
-    - name: Crear el directorio .ssh para cada usuario
+    - name: create .ssh directory for each user
       file:
         path: "/home/{{ item.username }}/.ssh"
         state: directory
@@ -25,7 +25,7 @@
         group: "{{ item.username }}"
       loop: "{{ users }}"
 
-    - name: Crear clave SSH para cada usuario
+    - name: Create SSH Key for each user
       openssh_keypair:
         path: "/home/{{ item.username }}/.ssh/id_rsa"
         owner: "{{ item.username }}"
@@ -35,7 +35,7 @@
         size: 2048
       loop: "{{ users }}"
 
-    - name: Obtener la clave publica de SSH
+    - name: Obtain the public SSH Key
       slurp:
         src: "/home/{{ item.username }}/.ssh/id_rsa.pub"
       loop: "{{ users }}"
@@ -47,9 +47,9 @@
 
     - name: Enviar la clave SSH por correo electronico
       mail:
-        host: smtp.gmail.com
-        port: 587
-        from: "mar.fm0577@gmail.com"
+        #host: smtp.gmail.com
+        #port: 587
+        from: "cm7780@hotmail.com"
         to: "{{ item.item.email }}"
         subject: "Your SSH key"
         body: |
@@ -58,6 +58,6 @@
           Here is your new SSH key:
 
           {{ item.content | b64decode }}
-        username: "mar.fm0577@gmail.com"  # Direccin de correo que usas para autenticacin SMTP
-        #password: "2$oNic0_r4Pi8o%"  # Usa una contrasea de aplicacin en Gmail (si tienes verificacin en dos pasos)
+        #username: "mar.fm0577@gmail.com"  
+        #password: ""  
       loop: "{{ public_keys.results }}"
