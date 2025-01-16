@@ -1,0 +1,63 @@
+---
+# description: Playbook that creates users, SSH Key and send the public SSH Key by Email
+- hosts: localhost
+  become: true
+  vars:
+    users:
+      - username: "test1"
+        email: "mf300577@gmail.com"
+      - username: "test2"
+        email: "cm7780@hotmail.com"
+  tasks:
+    - name: Create users in the system
+      user:
+        name: "{{ item.username }}"
+        state: present
+        shell: /bin/bash
+      loop: "{{ users }}"
+
+    - name: create .ssh directory for each user
+      file:
+        path: "/home/{{ item.username }}/.ssh"
+        state: directory
+        mode: '0700'
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+      loop: "{{ users }}"
+
+    - name: Create SSH Key for each user
+      openssh_keypair:
+        path: "/home/{{ item.username }}/.ssh/id_rsa"
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: '0600'
+        type: rsa
+        size: 2048
+      loop: "{{ users }}"
+
+    - name: Obtain the public SSH Key
+      slurp:
+        src: "/home/{{ item.username }}/.ssh/id_rsa.pub"
+      loop: "{{ users }}"
+      register: public_keys
+
+    - name: Verificar las claves publicas obtenidas
+      debug:
+        var: public_keys
+
+    - name: Enviar la clave SSH por correo electronico
+      mail:
+        #host: smtp.gmail.com
+        #port: 587
+        from: "cm7780@hotmail.com"
+        to: "{{ item.item.email }}"
+        subject: "Your SSH key"
+        body: |
+          Hi {{ item.item.username }},
+          
+          Here is your new SSH key:
+
+          {{ item.content | b64decode }}
+        #username: "mar.fm0577@gmail.com"  
+        #password: ""  
+      loop: "{{ public_keys.results }}"
