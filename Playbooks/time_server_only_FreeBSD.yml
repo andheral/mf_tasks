@@ -1,0 +1,19 @@
+---
+- hosts: FreeBSD 
+  gather_facts: False
+  vars:
+    directory:  /home/mari/ntp.conf #/etc/ntp.conf
+    time_server: "{{ time_server }}"
+    time_server_old: "{{ time_server_old }}"
+  tasks:
+    - name: Replace FreeBSD time server in file ntp.conf
+      replace: 
+        path: "{{ directory }}"
+        regexp: "{{ time_server_old }}"
+        replace: "{{ time_server }}"
+
+    - name: Restart ntp service
+      ansible.builtin.service:
+        name: ntpd
+        # name: ntpsec 
+        state: restarted
