@@ -1,0 +1,47 @@
+---
+- hosts: localhost
+  become: true
+  vars:
+    package1:
+    package2: 
+    package3: 
+    package4: 
+  tasks:
+    - name: install a program
+      apt:
+        name: "{{ item }}"
+        state: "latest"
+        update_cache: true
+      loop:
+      - "{{ package1 }}"
+      - "{{ package2 }}"
+      - "{{ package3 }}"
+      - "{{ package4 }}"
+      register: install_result
+
+    - name: Print message successfully
+      ansible.builtin.debug:
+        msg: "{{ package1 }}, {{ package2 }}, {{ package3 }}, {{ package4 }}, have been installed"
+      when: install_result.changed == true
+
+# ---------------------------
+#  Optional
+# ---------------------------
+
+#---
+#- hosts: localhost
+#  become: true
+#  vars:
+#    program: "default"
+#  tasks:
+#    - name: install a program
+#      apt:
+#        name: "{{ program }}"
+#        state: "latest"
+#        update_cache: true
+#      register: install_result
+
+#    - name: Print message successfully
+#      ansible.builtin.debug:
+#        msg: "{{ program }} have been installed"
+#      when: install_result.changed == true
