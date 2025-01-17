@@ -3,7 +3,7 @@
   gather_facts: false
   become: true
   vars:
-    directory: /etc/chrony/chrony.conf
+    directory: /etc/chrony.conf # /etc/chrony/chrony.conf
     time_server: "{{ time_server }}"
     time_server_old: "{{ time_server_old }}"
   tasks:
