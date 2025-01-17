@@ -1,13 +1,13 @@
 ---
-- hosts: FreeBSD 
+- hosts: OpenSuse
   gather_facts: false
   become: true
   vars:
-    directory: /etc/ntp.conf #/etc/ntpsec/ntp.conf #/home/mari/ntp.conf 
+    directory: /etc/chrony/chrony.conf
     time_server: "{{ time_server }}"
     time_server_old: "{{ time_server_old }}"
   tasks:
-    - name: Replace FreeBSD time zone in file ntp.conf
+    - name: Replace OpenSuse time zone in file chrony.conf
       replace: 
         path: "{{ directory }}"
         regexp: "{{ time_server_old | regex_escape }}"
@@ -18,8 +18,7 @@
       debug:
         msg: "{{ 'Time zone changed succesfully!' if results.changed else 'Error changing time zone' }}"
 
-    - name: Restart ntp service
+    - name: Restart chrony service
       ansible.builtin.service:
-        name: ntpd
-        # name: ntpsec 
+        name: chrony
         state: restarted
