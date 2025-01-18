@@ -1,0 +1,15 @@
+---
+- hosts: OpenSuse 
+  gather_facts: false
+  become: true
+  vars:
+    time_zone: "{{ time_zone }}"
+  tasks:
+    - name: Set time zone on OpenSuse
+      timezone:
+        name: "{{ time_zone }}"
+      register: results
+
+    - name: Show state message
+      debug:
+        msg: "{{ 'Time zone changed succesfully!' if results.changed else 'Error changing time zone' }}"

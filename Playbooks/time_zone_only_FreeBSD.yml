@@ -1,0 +1,22 @@
+---
+- hosts: FreeBSD
+  become: true
+  vars:
+    source: /usr/share/zoneinfo/
+    destiny: /etc/localtime
+    time_zone: "{{ time_zone }}"
+  tasks:
+    - name: Set the timezone on FreeBSD
+      copy:
+        src: "{{ source }}{{ time_zone }}"
+        dest: "{{ destiny }}"
+        #remote_src: yes preguntarle si se debe de omitir esto, 
+        # se utilizaria en yes si mi src esta en maquina remota y se intenta copiar 
+        # el archivo a la misma maquina remota (donde se ejecuta Ansible)
+        # de lo contrario ponerle remote_src: no
+        # porque se obtendria de la maquina local
+      register: results
+
+    - name: Show state message
+      debug:
+        msg: "{{ 'Time zone changed succesfully!' if results.changed else 'Error changing time zone' }}"

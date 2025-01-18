@@ -7,7 +7,7 @@
     time_server: "{{ time_server }}"
     time_server_old: "{{ time_server_old }}"
   tasks:
-    - name: Replace OpenSuse time zone in file chrony.conf
+    - name: Replace OpenSuse time server in file chrony.conf
       replace: 
         path: "{{ directory }}"
         regexp: "{{ time_server_old | regex_escape }}"
@@ -16,7 +16,7 @@
 
     - name: Show state message
       debug:
-        msg: "{{ 'Time zone changed succesfully!' if results.changed else 'Error changing time zone' }}"
+        msg: "{{ 'Time server changed succesfully!' if results.changed else 'Error changing time server' }}"
 
     - name: Restart chrony service
       ansible.builtin.service:
